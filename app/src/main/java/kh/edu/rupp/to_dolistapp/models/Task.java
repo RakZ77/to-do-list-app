@@ -7,6 +7,15 @@ public class Task {
     private int progress;
     private String color;
 
+    public Task(String title) {
+        this.title = title;
+        // Optional: set default values for other fields
+        this.id = 0;
+        this.name = "";
+        this.progress = 0;
+        this.color = "#FFFFFF"; // default white
+    }
+
     // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

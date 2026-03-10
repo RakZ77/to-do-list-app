@@ -1,5 +1,7 @@
 package kh.edu.rupp.to_dolistapp;
 
+import static kh.edu.rupp.to_dolistapp.NetworkUtil.isNetworkAvailable;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,12 +11,18 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.datastore.preferences.core.Preferences;
+import androidx.datastore.preferences.core.PreferencesKeys;
+import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder;
+import androidx.datastore.rxjava3.RxDataStore;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import kh.edu.rupp.to_dolistapp.adapters.TaskAdapter;
 import kh.edu.rupp.to_dolistapp.adapters.TaskGroupAdapter;
 import kh.edu.rupp.to_dolistapp.databinding.FragmentHomeBinding;
@@ -33,6 +41,9 @@ public class HomeFragment extends Fragment {
     private List<TaskGroup> taskGroups = new ArrayList<>();
     private FragmentHomeBinding binding;
     private static final String TAG = "HomeFragment";
+    private RxDataStore<Preferences> dataStore;
+    private Preferences.Key<String> taskKey = PreferencesKeys.stringKey("task_title");
+
 
     @Nullable
     @Override
@@ -45,6 +56,11 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        dataStore = new RxPreferenceDataStoreBuilder(
+                requireContext(),
+                "tasks"
+        ).build();
+
         // Initialize In Progress RecyclerView (Horizontal)
         taskAdapter = new TaskAdapter(inProgressTasks);
         binding.recyclerViewProgress.setLayoutManager(
@@ -56,8 +72,13 @@ public class HomeFragment extends Fragment {
         binding.recyclerViewTaskGroups.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerViewTaskGroups.setAdapter(taskGroupAdapter);
 
-        // Fetch data from API
-        getTasks();
+        // Fetch data from API if online, otherwise from local storage
+        if (isNetworkAvailable(requireContext())) {
+            getTasks();
+        } else {
+            Toast.makeText(getContext(), "No Internet Connection", Toast.LENGTH_SHORT).show();
+            loadTasksFromLocal();
+        }
     }
 
     private void getTasks() {
@@ -102,5 +123,27 @@ public class HomeFragment extends Fragment {
                 Log.e(TAG, "API Error: " + t.getMessage());
             }
         });
+    }
+
+    private void loadTasksFromLocal(){
+        dataStore.data()
+                .map(prefs -> prefs.get(taskKey))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(title -> {
+
+                    if (title != null) {
+
+                        Task task = new Task(title);
+
+                        inProgressTasks.clear();
+                        inProgressTasks.add(task);
+
+                        taskAdapter.notifyDataSetChanged();
+                    }
+
+                }, error -> {
+                    Log.e(TAG, error.getMessage());
+                });
     }
 }

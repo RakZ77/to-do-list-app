@@ -5,6 +5,15 @@
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_home_black_24dp"
         android:title="@string/title_home" />
+    <item
+        android:id="@+id/navigation_dashboard1"
+        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:title="Dashboard"/>
+    <item
+        android:id="@+id/add_task"
+        android:icon="@drawable/ic_add_24dp_round"
+        android:title="Add"
+        />
 
     <item
         android:id="@+id/navigation_dashboard"
