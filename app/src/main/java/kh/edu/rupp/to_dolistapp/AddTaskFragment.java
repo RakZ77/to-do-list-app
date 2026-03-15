@@ -19,6 +19,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -28,7 +34,7 @@ import kh.edu.rupp.to_dolistapp.databinding.FragmentHomeBinding;
 public class AddTaskFragment extends Fragment {
 
     private RxDataStore<Preferences> dataStore;
-    private Preferences.Key<String> taskKey = PreferencesKeys.stringKey("task_title");
+    private static final Preferences.Key<String> taskKey = PreferencesKeys.stringKey("task_list");
     private FragmentAddTaskBinding binding;
 
     @Nullable
@@ -65,7 +71,15 @@ public class AddTaskFragment extends Fragment {
     private void saveTask(String title) {
         dataStore.updateDataAsync(prefs -> {
                     MutablePreferences mutablePreferences = prefs.toMutablePreferences();
-                    mutablePreferences.set(taskKey, title);
+                    String json = mutablePreferences.get(taskKey);
+                    List<String> tasks = new ArrayList<>();
+                    if (json != null){
+                        tasks = new Gson().fromJson(json, new TypeToken<List<String>>(){}.getType());
+                    }
+                    tasks.add(title);
+                    String newJson = new Gson().toJson(tasks);
+                    mutablePreferences.set(taskKey, newJson);
+
                     return Single.just(mutablePreferences);
                 })
                 .subscribeOn(Schedulers.io())
@@ -73,6 +87,8 @@ public class AddTaskFragment extends Fragment {
                 .subscribe(
                         prefs -> {
                             Log.i("MY PREFS", prefs.toString());
+                            binding.editTextTitle.setText("");
+                            binding.editTextDescription.setText("");
                         },
                         error -> {
                             Log.e("MY ERROR", error.getMessage());
@@ -88,7 +104,6 @@ public class AddTaskFragment extends Fragment {
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(task -> {
-                    binding.taskTest.setText(task);
                 },error -> {
                     Log.e("MY ERROR", error.getMessage());
                 }

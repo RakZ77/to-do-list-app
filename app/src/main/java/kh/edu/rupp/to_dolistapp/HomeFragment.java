@@ -18,6 +18,9 @@ import androidx.datastore.rxjava3.RxDataStore;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +45,7 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private static final String TAG = "HomeFragment";
     private RxDataStore<Preferences> dataStore;
-    private Preferences.Key<String> taskKey = PreferencesKeys.stringKey("task_title");
+    private static final Preferences.Key<String> taskKey = PreferencesKeys.stringKey("task_list");
 
 
     @Nullable
@@ -77,6 +80,14 @@ public class HomeFragment extends Fragment {
             getTasks();
         } else {
             Toast.makeText(getContext(), "No Internet Connection", Toast.LENGTH_SHORT).show();
+            loadTasksFromLocal();
+        }
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(!isNetworkAvailable(requireContext())){
             loadTasksFromLocal();
         }
     }
@@ -130,15 +141,16 @@ public class HomeFragment extends Fragment {
                 .map(prefs -> prefs.get(taskKey))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(title -> {
+                .subscribe(json -> {
+                    Log.d(TAG, "Loaded JSON: " + json);
 
-                    if (title != null) {
+                    if (json != null) {
 
-                        Task task = new Task(title);
+                        List<String> tasks = new Gson().fromJson(json, new TypeToken<List<String>>(){}.getType());
 
-                        inProgressTasks.clear();
-                        inProgressTasks.add(task);
-
+                        for(String title : tasks){
+                            inProgressTasks.add(new Task(title));
+                        }
                         taskAdapter.notifyDataSetChanged();
                     }
 

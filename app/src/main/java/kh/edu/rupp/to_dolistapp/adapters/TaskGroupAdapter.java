@@ -4,10 +4,14 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,19 +48,34 @@ public class TaskGroupAdapter extends RecyclerView.Adapter<TaskGroupAdapter.Task
     public static class TaskGroupViewHolder extends RecyclerView.ViewHolder {
         private TextView taskName;
         private TextView taskNumber;
-//        private TextView taskProgress;
+        private TextView taskProgress;
+        private ImageView taskIcon;
+        private CardView iconBackground;
 
         public TaskGroupViewHolder(@NonNull View itemView) {
             super(itemView);
             taskName = itemView.findViewById(R.id.taskName);
             taskNumber = itemView.findViewById(R.id.taskNumber);
-//            taskProgress = itemView.findViewById(R.id.taskProgress);
+            taskProgress = itemView.findViewById(R.id.taskProgress);
+            taskIcon = itemView.findViewById(R.id.taskIcon);
+            iconBackground = itemView.findViewById(R.id.iconBackground);
         }
 
         public void bind(TaskGroup taskGroup) {
             taskName.setText(taskGroup.getName());
             taskNumber.setText(taskGroup.getTasks() + " Tasks");
-//            taskProgress.setText(taskGroup.getProgress() + "%");
+            taskProgress.setText(taskGroup.getProgress() + "%");
+            Picasso.get().load(taskGroup.getIcon()).fit().centerCrop().into(taskIcon);
+
+            if (taskGroup.getColor() != null && !taskGroup.getColor().isEmpty()) {
+                try {
+                    iconBackground.setCardBackgroundColor(
+                            Color.parseColor(taskGroup.getColor())
+                    );
+                } catch (IllegalArgumentException e) {
+                    iconBackground.setCardBackgroundColor(Color.GRAY);
+                }
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ public class TaskGroup {
     private String name;
     private int tasks;
     private int progress;
+    private String color;
     private String icon;
 
     // Getters and Setters
@@ -22,4 +23,7 @@ public class TaskGroup {
 
     public String getIcon() { return icon; }
     public void setIcon(String icon) { this.icon = icon; }
+
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
 }

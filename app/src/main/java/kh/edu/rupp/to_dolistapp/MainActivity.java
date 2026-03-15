@@ -10,6 +10,7 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -27,19 +28,25 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
         }
 
+        // Switching between fragments in navigation bar
         BottomNavigationView navView = findViewById(id.nav_view);
         navView.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.add_task){
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, new AddTaskFragment())
-                        .addToBackStack(null)
-                        .commit();
-                return true;
-            }
-            return false;
-        });
 
+            Fragment fragment;
+
+            if (item.getItemId() == id.navigation_home){
+                fragment = new HomeFragment();
+            } else if (item.getItemId() == id.add_task){
+                fragment = new AddTaskFragment();
+            } else {
+            return false;
+            }
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commit();
+            return true;
+        });
     }
 }

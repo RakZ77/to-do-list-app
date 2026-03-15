@@ -31,20 +31,14 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="text"
-        android:text="Description" />
+        android:hint="Description" />
 
     <Button
         android:id="@+id/addButton"
         android:layout_marginTop="24dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save TAsk" />
-
-    <TextView
-        android:id="@+id/taskTest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:text="Save Task" />
 
 
 </LinearLayout>
