@@ -1,4 +1,4 @@
-package kh.edu.rupp.to_dolistapp;
+package kh.edu.rupp.to_dolistapp.views;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,6 +7,8 @@ import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import kh.edu.rupp.to_dolistapp.R;
 
 public class LoginActivity extends AppCompatActivity {
     Button btnStart;

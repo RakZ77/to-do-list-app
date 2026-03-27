@@ -1,18 +1,17 @@
-package kh.edu.rupp.to_dolistapp;
+package kh.edu.rupp.to_dolistapp.views;
 
 import static kh.edu.rupp.to_dolistapp.R.*;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import kh.edu.rupp.to_dolistapp.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,15 +36,16 @@ public class MainActivity extends AppCompatActivity {
             if (item.getItemId() == id.navigation_home){
                 fragment = new HomeFragment();
             } else if (item.getItemId() == id.add_task){
-                fragment = new AddTaskFragment();
+                Intent intent = new Intent(MainActivity.this, AddTaskActivity.class);
+                startActivity(intent);
             } else {
             return false;
             }
 
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .commit();
+//            getSupportFragmentManager()
+//                    .beginTransaction()
+//                    .replace(R.id.fragment_container, fragment)
+//                    .commit();
             return true;
         });
     }

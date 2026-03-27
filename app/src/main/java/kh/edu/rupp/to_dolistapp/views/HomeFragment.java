@@ -1,4 +1,4 @@
-package kh.edu.rupp.to_dolistapp;
+package kh.edu.rupp.to_dolistapp.views;
 
 import static kh.edu.rupp.to_dolistapp.NetworkUtil.isNetworkAvailable;
 
