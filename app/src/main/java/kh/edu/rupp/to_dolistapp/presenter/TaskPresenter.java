@@ -1,7 +1,6 @@
-package kh.edu.rupp.to_dolistapp.controllers;
+package kh.edu.rupp.to_dolistapp.presenter;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.List;
 
@@ -11,42 +10,36 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import kh.edu.rupp.to_dolistapp.database.TaskListDao;
 import kh.edu.rupp.to_dolistapp.database.TaskListDb;
 import kh.edu.rupp.to_dolistapp.models.TaskList;
+import kh.edu.rupp.to_dolistapp.views.TaskListView;
 
-public class TaskController {
+public class TaskPresenter {
     private TaskListDao taskListDao;
+    private TaskListView view;
     private CompositeDisposable disposable = new CompositeDisposable();
 
-    public interface TaskCallBack{
-        void onTaskLoaded(List<TaskList> taskList);
-        void onError(String message);
-    }
-
-    public interface SaveCallBack{
-        void onSaved();
-        void onError(String message);
-    }
-
-    public TaskController(Context context) {
+    public TaskPresenter(Context context, TaskListView view) {
+        this.view = view;
         taskListDao = TaskListDb.getInstance(context).taskListDao();
     }
 
 
-    public void loadTask(TaskCallBack callback) {
+
+    public void loadTask() {
         disposable.add(
                 taskListDao.getAllTaskLists()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                callback::onTaskLoaded,
-                                error-> callback.onError(error.getMessage())
+                                view::loadTask,
+                                error-> view.onError(error.getMessage())
                         )
         );
     }
-    public void saveTask(String title, String description, String date, String priority, String group, SaveCallBack callback){
+    public void saveTask(String title, String description, String date, String priority, String group){
 
         // Validation
         if (title.isEmpty()) {
-            callback.onError("Title required");
+            view.onError("Title required");
             return;
         }
 
@@ -56,8 +49,8 @@ public class TaskController {
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                callback::onSaved,
-                                error -> callback.onError(error.getMessage())
+                                view::onSaved,
+                                error -> view.onError(error.getMessage())
                         )
         );
     }

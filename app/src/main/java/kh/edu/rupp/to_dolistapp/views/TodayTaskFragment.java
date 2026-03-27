@@ -13,16 +13,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.List;
 
-import kh.edu.rupp.to_dolistapp.R;
 import kh.edu.rupp.to_dolistapp.adapters.TaskListAdapter;
-import kh.edu.rupp.to_dolistapp.controllers.TaskController;
+import kh.edu.rupp.to_dolistapp.presenter.TaskPresenter;
 import kh.edu.rupp.to_dolistapp.databinding.FragmentTodayTaskBinding;
 import kh.edu.rupp.to_dolistapp.models.TaskList;
 
-public class TodayTaskFragment extends Fragment {
+public class TodayTaskFragment extends Fragment implements TaskListView {
 
     private FragmentTodayTaskBinding binding;  // use fragment binding, not activity
-    private TaskController taskController;
+    private TaskPresenter taskPresenter;
     private TaskListAdapter adapter;
 
     @Nullable
@@ -39,7 +38,7 @@ public class TodayTaskFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Init controller and adapter
-        taskController = new TaskController(requireContext());
+        taskPresenter = new TaskPresenter(requireContext(), this);
         adapter = new TaskListAdapter();
 
         // Setup RecyclerView
@@ -47,27 +46,28 @@ public class TodayTaskFragment extends Fragment {
         binding.todayTaskRecycler.setAdapter(adapter);
 
         //  Load tasks
-        loadTasks();
+        taskPresenter.loadTask();
     }
 
-    private void loadTasks() {
-        taskController.loadTask(new TaskController.TaskCallBack() {
-            @Override
-            public void onTaskLoaded(List<TaskList> taskList) {
-                adapter.setTasks(taskList);
-            }
+    @Override
+    public void loadTask(List<TaskList> taskList){
+        adapter.setTasks(taskList);
+    }
 
-            @Override
-            public void onError(String message) {
-                Log.e("TodayTaskFragment", message);
-            }
-        });
+    @Override
+    public void onSaved(){
+
+    }
+
+    @Override
+    public void onError(String message){
+        Log.e("TodayTaskFragment", message);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        taskController.dispose();
+        taskPresenter.dispose();
         binding = null;  // ✅ prevent memory leak in fragments
     }
 }

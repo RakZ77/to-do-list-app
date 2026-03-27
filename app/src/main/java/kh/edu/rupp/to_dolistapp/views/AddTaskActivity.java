@@ -6,32 +6,24 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
 import java.util.List;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-import kh.edu.rupp.to_dolistapp.R;
-import kh.edu.rupp.to_dolistapp.controllers.TaskController;
-import kh.edu.rupp.to_dolistapp.database.TaskListDao;
-import kh.edu.rupp.to_dolistapp.database.TaskListDb;
+import kh.edu.rupp.to_dolistapp.presenter.TaskPresenter;
 import kh.edu.rupp.to_dolistapp.databinding.ActivityAddTaskBinding;
 import kh.edu.rupp.to_dolistapp.models.TaskList;
 
-public class AddTaskActivity extends AppCompatActivity{
+public class AddTaskActivity extends AppCompatActivity implements TaskListView{
 
     ActivityAddTaskBinding binding;
-    TaskController taskController;
+    TaskPresenter taskPresenter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,8 +31,8 @@ public class AddTaskActivity extends AppCompatActivity{
         binding = ActivityAddTaskBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        taskController = new TaskController(this);
-        loadAndDisplayTasks();
+        taskPresenter = new TaskPresenter(this, this);
+        taskPresenter.loadTask();
         setupDateTimePicker();
 
         // When the save button is clicked -> save task
@@ -52,22 +44,7 @@ public class AddTaskActivity extends AppCompatActivity{
             String priority = getCheckedChipText(binding.chipGroupPriority, "Medium");
             String group    = getCheckedChipText(binding.chipGroupTaskGroup, "General");
 
-            taskController.saveTask(title, desc, date, priority, group, new TaskController.SaveCallBack() {
-                @Override
-                public void onSaved() {
-                    // View's job: update UI after save
-                    binding.etTaskName.setText("");
-                    binding.etDescription.setText("");
-                    binding.etDueDate.setText("");
-                    loadAndDisplayTasks();
-                }
-
-                @Override
-                public void onError(String message) {
-                    if (message.equals("Title required"))
-                        binding.etTaskName.setError(message);
-                }
-            });
+            taskPresenter.saveTask(title, desc, date, priority, group);
         });
 
         // Arrow back button to return to TaskListActivity
@@ -76,31 +53,40 @@ public class AddTaskActivity extends AppCompatActivity{
                     startActivity(intent);
         });
     }
-    private void loadAndDisplayTasks() {
-        taskController.loadTask(new TaskController.TaskCallBack() {
-            @Override
-            public void onTaskLoaded(List<TaskList> taskList) {
-                // View's job: format and display data
-                if (!taskList.isEmpty()) {
-                    StringBuilder builder = new StringBuilder();
-                    for (TaskList task : taskList) {
-                        builder.append("📌 ").append(task.title).append("\n")
-                                .append("📝 ").append(task.description).append("\n")
-                                .append("📅 ").append(task.date).append("\n")
-                                .append("⚡ ").append(task.priority).append("\n")
-                                .append("🏷️ ").append(task.group).append("\n\n");
-                    }
-                    binding.etTaskDemo.setText(builder.toString());
-                } else {
-                    binding.etTaskDemo.setText("No Task");
-                }
-            }
 
-            @Override
-            public void onError(String message) {
-                Log.e("LOAD ERROR", message);
-            }
-        });
+    // MVP contract: presenter tells view to display task
+    @Override
+    public void loadTask(List<TaskList> taskList) {
+        if (taskList.isEmpty()){
+            binding.etTaskDemo.setText("No Task");
+            return;
+        }
+        StringBuilder builder = new StringBuilder();
+        for (TaskList task : taskList) {
+            builder.append("📌 ").append(task.title).append("\n")
+                    .append("📝 ").append(task.description).append("\n")
+                    .append("📅 ").append(task.date).append("\n")
+                    .append("⚡ ").append(task.priority).append("\n")
+                    .append("🏷️ ").append(task.group).append("\n\n");
+        }
+        binding.etTaskDemo.setText(builder.toString());
+    }
+
+    //  MVP contract: presenter tells view save succeeded → reset form + reload
+    @Override
+    public void onSaved() {
+        binding.etTaskName.setText("");
+        binding.etDescription.setText("");
+        binding.etDueDate.setText("");
+        taskPresenter.loadTask();
+    }
+
+    //  MVP contract: presenter tells view something went wrong
+    @Override
+    public void onError(String message) {
+        if ("Title required".equals(message)) {
+            binding.etTaskName.setError(message);
+        }
     }
 
     // Helper: read selected chip text from a ChipGroup
@@ -134,6 +120,6 @@ public class AddTaskActivity extends AppCompatActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        taskController.dispose();  // ✅ clean up disposables
+        taskPresenter.dispose();  // ✅ clean up disposables
     }
 }
