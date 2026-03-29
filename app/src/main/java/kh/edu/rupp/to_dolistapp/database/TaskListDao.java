@@ -1,5 +1,6 @@
 package kh.edu.rupp.to_dolistapp.database;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -16,8 +17,14 @@ public interface TaskListDao {
     Completable insert(TaskList taskList);
 
     @Query("SELECT * FROM task_list")
-    Flowable<List<TaskList>> getAllTaskLists();
+    LiveData<List<TaskList>> getAllTaskLists();
 
     @Query("SELECT * FROM task_list WHERE id = :id")
-    Flowable <TaskList> getTaskListById(int id);
+    LiveData<TaskList> getTaskListById(int id);
+
+    @Query("DELETE FROM task_list WHERE id = :id")
+    Completable deleteTaskListById(int id);
+
+    @Query("DELETE FROM task_list")
+    Completable deleteAllTaskLists();
 }

@@ -4,11 +4,12 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -16,86 +17,48 @@ import com.google.android.material.chip.ChipGroup;
 import java.util.Calendar;
 import java.util.List;
 
-import kh.edu.rupp.to_dolistapp.presenter.TaskPresenter;
+import kh.edu.rupp.to_dolistapp.R;
 import kh.edu.rupp.to_dolistapp.databinding.ActivityAddTaskBinding;
 import kh.edu.rupp.to_dolistapp.models.TaskList;
+import kh.edu.rupp.to_dolistapp.viewmodels.TaskViewModel;
 
-public class AddTaskActivity extends AppCompatActivity implements TaskListView{
+public class AddTaskActivity extends AppCompatActivity {
 
     ActivityAddTaskBinding binding;
-    TaskPresenter taskPresenter;
+    TaskViewModel viewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityAddTaskBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
 
-        taskPresenter = new TaskPresenter(this, this);
-        taskPresenter.loadTask();
+        // DataBinding
+        binding = (ActivityAddTaskBinding) DataBindingUtil.setContentView(this, R.layout.activity_add_task);
+        viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
+        binding.setViewModel(viewModel);
+        binding.setLifecycleOwner(this);
+
+        setupChips();
         setupDateTimePicker();
 
-        // When the save button is clicked -> save task
-        binding.btnSaveTask.setOnClickListener(v -> {
-            // View's job: read UI values and pass to controller
-            String title    = binding.etTaskName.getText().toString().trim();
-            String desc     = binding.etDescription.getText().toString().trim();
-            String date     = binding.etDueDate.getText().toString().trim();
-            String priority = getCheckedChipText(binding.chipGroupPriority, "Medium");
-            String group    = getCheckedChipText(binding.chipGroupTaskGroup, "General");
+        binding.backHomeBtn.setOnClickListener(v ->
+                startActivity(new Intent(this, TaskListActivity.class))
+        );
+    }
 
-            taskPresenter.saveTask(title, desc, date, priority, group);
+    private void setupChips() {
+        binding.chipGroupPriority.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (!checkedIds.isEmpty()) {
+                Chip chip = findViewById(checkedIds.get(0));
+                viewModel.priority.setValue(chip.getText().toString());
+            }
         });
 
-        // Arrow back button to return to TaskListActivity
-        binding.backHomeBtn.setOnClickListener(view -> {
-                    Intent intent = new Intent(this, TaskListActivity.class);
-                    startActivity(intent);
+        binding.chipGroupTaskGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            if (!checkedIds.isEmpty()) {
+                Chip chip = findViewById(checkedIds.get(0));
+                viewModel.group.setValue(chip.getText().toString());
+            }
         });
-    }
-
-    // MVP contract: presenter tells view to display task
-    @Override
-    public void loadTask(List<TaskList> taskList) {
-        if (taskList.isEmpty()){
-            binding.etTaskDemo.setText("No Task");
-            return;
-        }
-        StringBuilder builder = new StringBuilder();
-        for (TaskList task : taskList) {
-            builder.append("📌 ").append(task.title).append("\n")
-                    .append("📝 ").append(task.description).append("\n")
-                    .append("📅 ").append(task.date).append("\n")
-                    .append("⚡ ").append(task.priority).append("\n")
-                    .append("🏷️ ").append(task.group).append("\n\n");
-        }
-        binding.etTaskDemo.setText(builder.toString());
-    }
-
-    //  MVP contract: presenter tells view save succeeded → reset form + reload
-    @Override
-    public void onSaved() {
-        binding.etTaskName.setText("");
-        binding.etDescription.setText("");
-        binding.etDueDate.setText("");
-        taskPresenter.loadTask();
-    }
-
-    //  MVP contract: presenter tells view something went wrong
-    @Override
-    public void onError(String message) {
-        if ("Title required".equals(message)) {
-            binding.etTaskName.setError(message);
-        }
-    }
-
-    // Helper: read selected chip text from a ChipGroup
-    private String getCheckedChipText(ChipGroup chipGroup, String defaultValue) {
-        int checkedId = chipGroup.getCheckedChipId();
-        if (checkedId != View.NO_ID) {
-            return ((Chip) binding.getRoot().findViewById(checkedId)).getText().toString();
-        }
-        return defaultValue;
     }
 
     private void setupDateTimePicker() {
@@ -107,7 +70,7 @@ public class AddTaskActivity extends AppCompatActivity implements TaskListView{
                             "Jul","Aug","Sep","Oct","Nov","Dec"};
                     String amPm = hour < 12 ? "AM" : "PM";
                     int displayHour = hour % 12 == 0 ? 12 : hour % 12;
-                    binding.etDueDate.setText(
+                    viewModel.date.setValue(
                             months[month] + " " + day + ", " + year +
                                     " at " + displayHour + ":" + String.format("%02d", minute) + " " + amPm
                     );
@@ -115,11 +78,5 @@ public class AddTaskActivity extends AppCompatActivity implements TaskListView{
             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                     calendar.get(Calendar.DAY_OF_MONTH)).show();
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        taskPresenter.dispose();  // ✅ clean up disposables
     }
 }

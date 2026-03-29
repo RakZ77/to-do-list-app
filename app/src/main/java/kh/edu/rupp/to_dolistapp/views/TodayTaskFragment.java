@@ -8,28 +8,31 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.util.List;
 
+import kh.edu.rupp.to_dolistapp.R;
 import kh.edu.rupp.to_dolistapp.adapters.TaskListAdapter;
-import kh.edu.rupp.to_dolistapp.presenter.TaskPresenter;
 import kh.edu.rupp.to_dolistapp.databinding.FragmentTodayTaskBinding;
 import kh.edu.rupp.to_dolistapp.models.TaskList;
+import kh.edu.rupp.to_dolistapp.viewmodels.TaskViewModel;
 
-public class TodayTaskFragment extends Fragment implements TaskListView {
+public class TodayTaskFragment extends Fragment {
 
     private FragmentTodayTaskBinding binding;  // use fragment binding, not activity
-    private TaskPresenter taskPresenter;
+    private TaskViewModel viewModel;
     private TaskListAdapter adapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        // ✅Inflate via binding instead of R.layout directly
-        binding = FragmentTodayTaskBinding.inflate(inflater, container, false);
+        // Inflate via binding instead of R.layout directly
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_today_task, container, false);
         return binding.getRoot();
     }
 
@@ -38,36 +41,27 @@ public class TodayTaskFragment extends Fragment implements TaskListView {
         super.onViewCreated(view, savedInstanceState);
 
         // Init controller and adapter
-        taskPresenter = new TaskPresenter(requireContext(), this);
+        viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         adapter = new TaskListAdapter();
+
+        binding.setViewModel(viewModel);
+        binding.setLifecycleOwner(getViewLifecycleOwner());
+
 
         // Setup RecyclerView
         binding.todayTaskRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.todayTaskRecycler.setAdapter(adapter);
 
         //  Load tasks
-        taskPresenter.loadTask();
-    }
-
-    @Override
-    public void loadTask(List<TaskList> taskList){
-        adapter.setTasks(taskList);
-    }
-
-    @Override
-    public void onSaved(){
-
-    }
-
-    @Override
-    public void onError(String message){
-        Log.e("TodayTaskFragment", message);
+        viewModel.taskList.observe(getViewLifecycleOwner(), taskList -> {
+            adapter.setTasks(taskList);
+        });
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        taskPresenter.dispose();
-        binding = null;  // ✅ prevent memory leak in fragments
+        binding = null;  // avoid memory leak
+        // no presenter to dispose — ViewModel handles lifecycle
     }
 }

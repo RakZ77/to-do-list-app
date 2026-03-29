@@ -31,6 +31,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        dataBinding = true
     }
 }
 
@@ -50,6 +51,8 @@ dependencies {
     implementation(libs.viewpager2)
     implementation(libs.room.runtime)
     testImplementation(libs.junit)
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.10.0 ")
     implementation("androidx.room:room-runtime:2.8.4")
     implementation("androidx.room:room-rxjava3:2.8.4")
     annotationProcessor("androidx.room:room-compiler:2.8.4")
