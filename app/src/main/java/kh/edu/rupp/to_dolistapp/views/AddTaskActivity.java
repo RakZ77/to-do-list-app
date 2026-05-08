@@ -40,9 +40,11 @@ public class AddTaskActivity extends AppCompatActivity {
         setupChips();
         setupDateTimePicker();
 
-        binding.backHomeBtn.setOnClickListener(v ->
-                startActivity(new Intent(this, TaskListActivity.class))
-        );
+        binding.backHomeBtn.setOnClickListener(v -> finish());
+        binding.btnSaveTask.setOnClickListener(v -> {
+            viewModel.insert();
+            finish();
+        });
     }
 
     private void setupChips() {

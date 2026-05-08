@@ -36,16 +36,17 @@ public class MainActivity extends AppCompatActivity {
             if (item.getItemId() == id.navigation_home){
                 fragment = new HomeFragment();
             } else if (item.getItemId() == id.add_task){
-                Intent intent = new Intent(MainActivity.this, AddTaskActivity.class);
-                startActivity(intent);
+                fragment = new TaskListFragment();
+            } else if (item.getItemId() == id.navigation_user_list){
+                fragment = new UserListFragment();
             } else {
             return false;
             }
 
-//            getSupportFragmentManager()
-//                    .beginTransaction()
-//                    .replace(R.id.fragment_container, fragment)
-//                    .commit();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .commit();
             return true;
         });
     }

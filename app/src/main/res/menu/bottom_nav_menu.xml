@@ -6,9 +6,9 @@
         android:icon="@drawable/ic_home_black_24dp"
         android:title="@string/title_home" />
     <item
-        android:id="@+id/navigation_dashboard1"
-        android:icon="@drawable/ic_dashboard_black_24dp"
-        android:title="Dashboard"/>
+        android:id="@+id/navigation_user_list"
+        android:icon="@drawable/ic_user_icon"
+        android:title="User List"/>
     <item
         android:id="@+id/add_task"
         android:icon="@drawable/ic_add_24dp_round"
