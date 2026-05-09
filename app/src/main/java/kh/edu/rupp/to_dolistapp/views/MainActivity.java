@@ -11,8 +11,10 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import kh.edu.rupp.to_dolistapp.R;
 
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
     @Override
