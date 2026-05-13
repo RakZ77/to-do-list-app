@@ -1,74 +1,68 @@
-package kh.edu.rupp.to_dolistapp.adapters;
+package kh.edu.rupp.to_dolistapp.adapters
 
-import android.graphics.Color;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.RecyclerView
+import kh.edu.rupp.to_dolistapp.R
+import kh.edu.rupp.to_dolistapp.models.Task
 
-import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.RecyclerView;
+class TaskAdapter(tasks: MutableList<Task>) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder?>() {
+    private var tasks: MutableList<Task> = ArrayList<Task>()
 
-import java.util.ArrayList;
-import java.util.List;
-
-import kh.edu.rupp.to_dolistapp.R;
-import kh.edu.rupp.to_dolistapp.models.Task;
-
-public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
-    private List<Task> tasks = new ArrayList<>();
-
-    public TaskAdapter(List<Task> tasks) {
-        this.tasks = tasks;
+    init {
+        this.tasks = tasks
     }
 
-    @NonNull
-    @Override
-    public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.progress_task_view, parent, false);
-        return new TaskViewHolder(view);
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
+        val view = LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.progress_task_view, parent, false)
+        return TaskViewHolder(view)
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
-        Task task = tasks.get(position);
-        holder.bind(task);
+    override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
+        val task = tasks.get(position)
+        holder.bind(task)
     }
 
-    @Override
-    public int getItemCount() {
-        return tasks.size();
+    override fun getItemCount(): Int {
+        return tasks.size
     }
 
-    public static class TaskViewHolder extends RecyclerView.ViewHolder {
-        private TextView taskName;
-        private TextView taskTitle;
-        private ProgressBar progressBar;
-        private CardView cardBackground;
+    class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val taskName: TextView
+        private val taskTitle: TextView
+        private val progressBar: ProgressBar
+        private val cardBackground: CardView
 
-        public TaskViewHolder(@NonNull View itemView) {
-            super(itemView);
-            taskName = itemView.findViewById(R.id.taskName);
-            taskTitle = itemView.findViewById(R.id.taskTitle);
-            progressBar = itemView.findViewById(R.id.progressBar);
-            cardBackground = itemView.findViewById(R.id.cardBackground);
+        init {
+            taskName = itemView.findViewById<TextView>(R.id.taskName)
+            taskTitle = itemView.findViewById<TextView>(R.id.taskTitle)
+            progressBar = itemView.findViewById<ProgressBar>(R.id.progressBar)
+            cardBackground = itemView.findViewById<CardView>(R.id.cardBackground)
         }
 
-        public void bind(Task task) {
-            taskTitle.setText(task.getTitle());
-            taskName.setText(task.getName());
-            progressBar.setProgress(task.getProgress());
+        fun bind(task: Task) {
+            taskTitle.setText(task.title)
+            taskName.setText(task.name)
+            progressBar.setProgress(task.progress)
 
-            if (task.getColor() != null && !task.getColor().isEmpty()) {
+            val color = task.color
+
+            if (!color.isNullOrEmpty()) {
+
                 try {
                     cardBackground.setCardBackgroundColor(
-                            Color.parseColor(task.getColor())
-                    );
-                } catch (IllegalArgumentException e) {
-                    cardBackground.setCardBackgroundColor(Color.GRAY);
+                        Color.parseColor(color)
+                    )
+
+                } catch (e: IllegalArgumentException) {
+
+                    cardBackground.setCardBackgroundColor(Color.GRAY)
                 }
             }
         }

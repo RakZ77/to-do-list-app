@@ -1,46 +1,48 @@
-package kh.edu.rupp.to_dolistapp.viewmodels;
+package kh.edu.rupp.to_dolistapp.viewmodels
 
-import android.app.Application;
-import androidx.annotation.NonNull;
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import kh.edu.rupp.to_dolistapp.models.TaskList
+import kh.edu.rupp.to_dolistapp.repositories.TaskRepository
 
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+class TaskViewModel(application: Application) : AndroidViewModel(application) {
 
-import java.util.List;
+    private val repository: TaskRepository = TaskRepository(application)
 
-import kh.edu.rupp.to_dolistapp.models.TaskList;
-import kh.edu.rupp.to_dolistapp.repositories.TaskRepository;
+    // Fixed: LiveData<List<TaskList>> — matches repository and Room, no nullable wrapper
+    val taskList: LiveData<List<TaskList>> = repository.allTaskLists
 
-public class TaskViewModel extends AndroidViewModel {
-    private TaskRepository repository;
-    public LiveData<List<TaskList>> taskList;
+    // Two-way bindable fields
+    @JvmField
+    var title: MutableLiveData<String?> = MutableLiveData("")
+    @JvmField
+    var description: MutableLiveData<String?> = MutableLiveData("")
+    @JvmField
+    var date: MutableLiveData<String?> = MutableLiveData("")
+    @JvmField
+    var priority: MutableLiveData<String?> = MutableLiveData("Medium")
+    @JvmField
+    var group: MutableLiveData<String?> = MutableLiveData("General")
 
-    //  Two-way bindable fields
-    public MutableLiveData<String> title       = new MutableLiveData<>("");
-    public MutableLiveData<String> description = new MutableLiveData<>("");
-    public MutableLiveData<String> date        = new MutableLiveData<>("");
-    public MutableLiveData<String> priority    = new MutableLiveData<>("Medium");
-    public MutableLiveData<String> group       = new MutableLiveData<>("General");
+    fun insert() {
+        val t = title.value
+        if (t.isNullOrEmpty()) return
 
-    public TaskViewModel(@NonNull Application application) {
-        super(application);
-        repository = new TaskRepository(application);
-        taskList = repository.getAllTaskLists(); //auto-updates via LiveData
+        repository.insert(
+            t,
+            description.value ?: "",
+            date.value ?: "",
+            priority.value ?: "Medium",
+            group.value ?: "General"
+        )
+        clearFields()
     }
 
-    public void insert(){
-        String t = title.getValue();
-        if(t == null || t.isEmpty()) return;
-
-        repository.insert(t, description.getValue(), date.getValue(), priority.getValue(), group.getValue());
-        clearFields();
+    private fun clearFields() {
+        title.value = ""
+        description.value = ""
+        date.value = ""
     }
-    private void clearFields() {
-        title.setValue("");
-        description.setValue("");
-        date.setValue("");
-    }
-
-
 }

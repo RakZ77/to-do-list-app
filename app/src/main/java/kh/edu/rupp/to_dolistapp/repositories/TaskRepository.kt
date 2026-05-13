@@ -1,37 +1,43 @@
-package kh.edu.rupp.to_dolistapp.repositories;
+package kh.edu.rupp.to_dolistapp.repositories
 
-import android.app.Application;
-import android.util.Log;
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.LiveData
+import io.reactivex.rxjava3.schedulers.Schedulers
+import kh.edu.rupp.to_dolistapp.database.TaskListDao
+import kh.edu.rupp.to_dolistapp.database.TaskListDb
+import kh.edu.rupp.to_dolistapp.models.TaskList
 
-import androidx.lifecycle.LiveData;
+class TaskRepository(app: Application) {
 
-import java.util.List;
+    private val taskListDao: TaskListDao =
+        TaskListDb.getInstance(app).taskListDao()
 
-import io.reactivex.rxjava3.schedulers.Schedulers;
-import kh.edu.rupp.to_dolistapp.database.TaskListDao;
-import kh.edu.rupp.to_dolistapp.database.TaskListDb;
-import kh.edu.rupp.to_dolistapp.models.TaskList;
+    // Fixed: LiveData<List<TaskList>> matches what Room's @Query returns — no nullability
+    val allTaskLists: LiveData<List<TaskList>>
+        get() = taskListDao.getAllTaskLists()
 
-public class TaskRepository {
-    private TaskListDao taskListDao;
+    fun insert(
+        title: String,
+        description: String,
+        date: String,
+        priority: String,
+        group: String
+    ) {
+        val task = TaskList(
+            title = title,
+            description = description,
+            date = date,
+            priority = priority,
+            group = group
+        )
 
-    public TaskRepository(Application app) {
-        taskListDao = TaskListDb.getInstance(app).taskListDao();
-    }
-
-    public LiveData<List<TaskList>> getAllTaskLists() {
-        return taskListDao.getAllTaskLists(); //  Room auto-delivers on main thread
-    }
-
-    public void insert(String title, String description,
-                       String date, String priority, String group) {
-
-        TaskList task = new TaskList(title, description, date, priority, group);
+        // Fixed: insert() returns Completable (not nullable), no ?. needed
         taskListDao.insert(task)
-                .subscribeOn(Schedulers.io())  //  runs DB work on IO thread
-                .subscribe(
-                        () -> Log.i("db", "Saved"),
-                        error -> Log.e("db", "Error: " + error.getMessage())
-                );
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { Log.i("db", "Saved") },
+                { error -> Log.e("db", "Error: ${error.message}") }
+            )
     }
 }

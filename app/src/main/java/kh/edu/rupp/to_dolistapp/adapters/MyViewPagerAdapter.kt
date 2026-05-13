@@ -1,38 +1,25 @@
-package kh.edu.rupp.to_dolistapp.adapters;
+package kh.edu.rupp.to_dolistapp.adapters
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import kh.edu.rupp.to_dolistapp.views.CompletedFragment
+import kh.edu.rupp.to_dolistapp.views.TodayTaskFragment
+import kh.edu.rupp.to_dolistapp.views.UpcomingFragment
 
-import kh.edu.rupp.to_dolistapp.views.CompletedFragment;
-import kh.edu.rupp.to_dolistapp.views.TodayTaskFragment;
-import kh.edu.rupp.to_dolistapp.views.UpcomingFragment;
-
-public class MyViewPagerAdapter extends FragmentStateAdapter {
-    public MyViewPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
-        super(fragmentActivity);
-    }
-
+class MyViewPagerAdapter(fragmentActivity: FragmentActivity) :
+    FragmentStateAdapter(fragmentActivity) {
     // Create fragment based on position
-    @NonNull
-    @Override
-    public Fragment createFragment(int position) {
-        switch (position){
-            case 0:
-                return new TodayTaskFragment();
-            case 1:
-                return new UpcomingFragment();
-            case 2:
-                return new CompletedFragment();
-            default:
-                return new TodayTaskFragment();
+    override fun createFragment(position: Int): Fragment {
+        when (position) {
+            0 -> return TodayTaskFragment()
+            1 -> return UpcomingFragment()
+            2 -> return CompletedFragment()
+            else -> return TodayTaskFragment()
         }
     }
 
-    @Override
-    public int getItemCount() {
-
-        return 3;
+    override fun getItemCount(): Int {
+        return 3
     }
 }

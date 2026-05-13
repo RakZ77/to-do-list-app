@@ -1,79 +1,81 @@
-package kh.edu.rupp.to_dolistapp.adapters;
+package kh.edu.rupp.to_dolistapp.adapters
 
-import android.graphics.Color;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
+import kh.edu.rupp.to_dolistapp.R
+import kh.edu.rupp.to_dolistapp.models.TaskGroup
 
-import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.RecyclerView;
+class TaskGroupAdapter(
+    private var taskGroups: MutableList<TaskGroup>
+) : RecyclerView.Adapter<TaskGroupAdapter.TaskGroupViewHolder>() {
 
-import com.squareup.picasso.Picasso;
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): TaskGroupViewHolder {
 
-import java.util.ArrayList;
-import java.util.List;
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.task_group_view, parent, false)
 
-import kh.edu.rupp.to_dolistapp.R;
-import kh.edu.rupp.to_dolistapp.models.TaskGroup;
-
-public class TaskGroupAdapter extends RecyclerView.Adapter<TaskGroupAdapter.TaskGroupViewHolder> {
-    private List<TaskGroup> taskGroups = new ArrayList<>();
-
-    public TaskGroupAdapter(List<TaskGroup> taskGroups) {
-        this.taskGroups = taskGroups;
+        return TaskGroupViewHolder(view)
     }
 
-    @NonNull
-    @Override
-    public TaskGroupViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.task_group_view, parent, false);
-        return new TaskGroupViewHolder(view);
+    override fun onBindViewHolder(holder: TaskGroupViewHolder, position: Int) {
+        holder.bind(taskGroups[position])
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull TaskGroupViewHolder holder, int position) {
-        TaskGroup taskGroup = taskGroups.get(position);
-        holder.bind(taskGroup);
-    }
+    override fun getItemCount(): Int = taskGroups.size
 
-    @Override
-    public int getItemCount() {
-        return taskGroups.size();
-    }
+    class TaskGroupViewHolder(itemView: View) :
+        RecyclerView.ViewHolder(itemView) {
 
-    public static class TaskGroupViewHolder extends RecyclerView.ViewHolder {
-        private TextView taskName;
-        private TextView taskNumber;
-        private TextView taskProgress;
-        private ImageView taskIcon;
-        private CardView iconBackground;
+        private val taskName: TextView =
+            itemView.findViewById(R.id.taskName)
 
-        public TaskGroupViewHolder(@NonNull View itemView) {
-            super(itemView);
-            taskName = itemView.findViewById(R.id.taskName);
-            taskNumber = itemView.findViewById(R.id.taskNumber);
-            taskProgress = itemView.findViewById(R.id.taskProgress);
-            taskIcon = itemView.findViewById(R.id.taskIcon);
-            iconBackground = itemView.findViewById(R.id.iconBackground);
-        }
+        private val taskNumber: TextView =
+            itemView.findViewById(R.id.taskNumber)
 
-        public void bind(TaskGroup taskGroup) {
-            taskName.setText(taskGroup.getName());
-            taskNumber.setText(taskGroup.getTasks() + " Tasks");
-            taskProgress.setText(taskGroup.getProgress() + "%");
-            Picasso.get().load(taskGroup.getIcon()).fit().centerCrop().into(taskIcon);
+        private val taskProgress: TextView =
+            itemView.findViewById(R.id.taskProgress)
 
-            if (taskGroup.getColor() != null && !taskGroup.getColor().isEmpty()) {
+        private val taskIcon: ImageView =
+            itemView.findViewById(R.id.taskIcon)
+
+        private val iconBackground: CardView =
+            itemView.findViewById(R.id.iconBackground)
+
+        fun bind(taskGroup: TaskGroup) {
+
+            taskName.text = taskGroup.name
+            taskNumber.text = "${taskGroup.tasks} Tasks"
+            taskProgress.text = "${taskGroup.progress}%"
+
+            Picasso.get()
+                .load(taskGroup.icon)
+                .fit()
+                .centerCrop()
+                .into(taskIcon)
+
+            val color = taskGroup.color
+
+            if (!color.isNullOrEmpty()) {
+
                 try {
+
                     iconBackground.setCardBackgroundColor(
-                            Color.parseColor(taskGroup.getColor())
-                    );
-                } catch (IllegalArgumentException e) {
-                    iconBackground.setCardBackgroundColor(Color.GRAY);
+                        Color.parseColor(color)
+                    )
+
+                } catch (e: IllegalArgumentException) {
+
+                    iconBackground.setCardBackgroundColor(Color.GRAY)
                 }
             }
         }

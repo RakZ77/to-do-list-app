@@ -1,31 +1,29 @@
-package kh.edu.rupp.to_dolistapp;
+package kh.edu.rupp.to_dolistapp
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
-import dagger.hilt.InstallIn;
-import dagger.hilt.components.SingletonComponent;
-import kh.edu.rupp.to_dolistapp.services.UserService;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import kh.edu.rupp.to_dolistapp.services.UserService
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent.class)
-public class NetworkModule {
+@InstallIn(SingletonComponent::class)
+class NetworkModule {
     @Provides
     @Singleton
-    public Retrofit providedRetrofit(){
-        return new Retrofit.Builder()
-                .baseUrl("https://raw.githubusercontent.com/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+    fun providedRetrofit(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://raw.githubusercontent.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
     }
 
     @Provides
     @Singleton
-    public UserService provideApiService(Retrofit retrofit) {
-        return retrofit.create(UserService.class);
+    fun provideApiService(retrofit: Retrofit): UserService {
+        return retrofit.create<UserService>(UserService::class.java)
     }
 }

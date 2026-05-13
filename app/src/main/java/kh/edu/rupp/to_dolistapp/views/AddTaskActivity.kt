@@ -1,84 +1,95 @@
-package kh.edu.rupp.to_dolistapp.views;
+package kh.edu.rupp.to_dolistapp.views
 
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
+import android.app.DatePickerDialog
+import android.app.DatePickerDialog.OnDateSetListener
+import android.app.TimePickerDialog
+import android.app.TimePickerDialog.OnTimeSetListener
+import android.os.Bundle
+import android.view.View
+import android.widget.DatePicker
+import android.widget.TimePicker
+import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
+import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import kh.edu.rupp.to_dolistapp.R
+import kh.edu.rupp.to_dolistapp.databinding.ActivityAddTaskBinding
+import kh.edu.rupp.to_dolistapp.viewmodels.TaskViewModel
+import java.util.Calendar
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModelProvider;
+class AddTaskActivity : AppCompatActivity() {
+    var binding: ActivityAddTaskBinding? = null
+    var viewModel: TaskViewModel? = null
 
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
-
-import java.util.Calendar;
-import java.util.List;
-
-import kh.edu.rupp.to_dolistapp.R;
-import kh.edu.rupp.to_dolistapp.databinding.ActivityAddTaskBinding;
-import kh.edu.rupp.to_dolistapp.models.TaskList;
-import kh.edu.rupp.to_dolistapp.viewmodels.TaskViewModel;
-
-public class AddTaskActivity extends AppCompatActivity {
-
-    ActivityAddTaskBinding binding;
-    TaskViewModel viewModel;
-
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         // DataBinding
-        binding = (ActivityAddTaskBinding) DataBindingUtil.setContentView(this, R.layout.activity_add_task);
-        viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
-        binding.setViewModel(viewModel);
-        binding.setLifecycleOwner(this);
+        binding = DataBindingUtil.setContentView<ViewDataBinding?>(
+            this,
+            R.layout.activity_add_task
+        ) as ActivityAddTaskBinding
+        viewModel = ViewModelProvider(this).get<TaskViewModel>(TaskViewModel::class.java)
+        binding!!.setViewModel(viewModel)
+        binding!!.setLifecycleOwner(this)
 
-        setupChips();
-        setupDateTimePicker();
+        setupChips()
+        setupDateTimePicker()
 
-        binding.backHomeBtn.setOnClickListener(v -> finish());
-        binding.btnSaveTask.setOnClickListener(v -> {
-            viewModel.insert();
-            finish();
-        });
+        binding!!.backHomeBtn.setOnClickListener(View.OnClickListener { v: View? -> finish() })
+        binding!!.btnSaveTask.setOnClickListener(View.OnClickListener { v: View? ->
+            viewModel!!.insert()
+            finish()
+        })
     }
 
-    private void setupChips() {
-        binding.chipGroupPriority.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (!checkedIds.isEmpty()) {
-                Chip chip = findViewById(checkedIds.get(0));
-                viewModel.priority.setValue(chip.getText().toString());
+    private fun setupChips() {
+        binding!!.chipGroupPriority.setOnCheckedStateChangeListener(ChipGroup.OnCheckedStateChangeListener { group: ChipGroup?, checkedIds: MutableList<Int?>? ->
+            if (!checkedIds!!.isEmpty()) {
+                val chip = findViewById<Chip>(checkedIds.get(0)!!)
+                viewModel!!.priority.setValue(chip.getText().toString())
             }
-        });
+        })
 
-        binding.chipGroupTaskGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (!checkedIds.isEmpty()) {
-                Chip chip = findViewById(checkedIds.get(0));
-                viewModel.group.setValue(chip.getText().toString());
+        binding!!.chipGroupTaskGroup.setOnCheckedStateChangeListener(ChipGroup.OnCheckedStateChangeListener { group: ChipGroup?, checkedIds: MutableList<Int?>? ->
+            if (!checkedIds!!.isEmpty()) {
+                val chip = findViewById<Chip>(checkedIds.get(0)!!)
+                viewModel!!.group.setValue(chip.getText().toString())
             }
-        });
+        })
     }
 
-    private void setupDateTimePicker() {
-        binding.etDueDate.setOnClickListener(v -> {
-            Calendar calendar = Calendar.getInstance();
-            new DatePickerDialog(this, (view, year, month, day) -> {
-                new TimePickerDialog(this, (timeView, hour, minute) -> {
-                    String[] months = {"Jan","Feb","Mar","Apr","May","Jun",
-                            "Jul","Aug","Sep","Oct","Nov","Dec"};
-                    String amPm = hour < 12 ? "AM" : "PM";
-                    int displayHour = hour % 12 == 0 ? 12 : hour % 12;
-                    viewModel.date.setValue(
-                            months[month] + " " + day + ", " + year +
-                                    " at " + displayHour + ":" + String.format("%02d", minute) + " " + amPm
-                    );
-                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                    calendar.get(Calendar.DAY_OF_MONTH)).show();
-        });
+    private fun setupDateTimePicker() {
+        binding!!.etDueDate.setOnClickListener(View.OnClickListener { v: View? ->
+            val calendar = Calendar.getInstance()
+            DatePickerDialog(
+                this, OnDateSetListener { view: DatePicker?, year: Int, month: Int, day: Int ->
+                    TimePickerDialog(
+                        this,
+                        OnTimeSetListener { timeView: TimePicker?, hour: Int, minute: Int ->
+                            val months = arrayOf<String?>(
+                                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                            )
+                            val amPm = if (hour < 12) "AM" else "PM"
+                            val displayHour = if (hour % 12 == 0) 12 else hour % 12
+                            viewModel!!.date.setValue(
+                                months[month] + " " + day + ", " + year +
+                                        " at " + displayHour + ":" + String.format(
+                                    "%02d",
+                                    minute
+                                ) + " " + amPm
+                            )
+                        },
+                        calendar.get(Calendar.HOUR_OF_DAY),
+                        calendar.get(Calendar.MINUTE),
+                        false
+                    ).show()
+                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        })
     }
 }

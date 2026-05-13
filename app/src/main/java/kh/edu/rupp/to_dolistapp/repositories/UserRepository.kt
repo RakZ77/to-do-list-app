@@ -1,43 +1,39 @@
-package kh.edu.rupp.to_dolistapp.repositories;
+package kh.edu.rupp.to_dolistapp.repositories
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import kh.edu.rupp.to_dolistapp.models.User
+import kh.edu.rupp.to_dolistapp.models.UserResponse
+import kh.edu.rupp.to_dolistapp.services.UserService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import javax.inject.Inject
 
-import java.util.List;
+class UserRepository @Inject constructor(private val api: UserService) {
 
-import javax.inject.Inject;
+    val users: LiveData<MutableList<User>>
+        get() {
+            val data = MutableLiveData<MutableList<User>>()
 
-import kh.edu.rupp.to_dolistapp.models.User;
-import kh.edu.rupp.to_dolistapp.models.UserResponse;
-import kh.edu.rupp.to_dolistapp.services.UserService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class UserRepository {
-    private UserService api;
-
-    @Inject
-    public UserRepository(UserService api) {
-        this.api = api;
-    }
-
-    public LiveData<List<User>> getUsers(){
-        MutableLiveData<List<User>> data = new MutableLiveData<>();
-
-        api.getUsers().enqueue(new Callback<UserResponse>() {
-            @Override
-            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    data.setValue(response.body().getUsers());
+            // Fixed: Callback<UserResponse> — no nullable type argument
+            api.getUsers()?.enqueue(object : Callback<UserResponse> {
+                override fun onResponse(
+                    call: Call<UserResponse>,
+                    response: Response<UserResponse>
+                ) {
+                    if (response.isSuccessful && response.body() != null) {
+                        // Fixed: users is List<User?> in model — filter nulls out
+                        val userList = response.body()!!.users
+                            ?.filterNotNull()
+                            ?.toMutableList()
+                            ?: mutableListOf()
+                        data.value = userList
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<UserResponse> call, Throwable t) {
-
-            }
-        });
-        return data;
-    }
+                override fun onFailure(call: Call<UserResponse>, t: Throwable) {}
+            })
+            return data
+        }
 }

@@ -1,55 +1,40 @@
-package kh.edu.rupp.to_dolistapp.views;
+package kh.edu.rupp.to_dolistapp.views
 
-import static kh.edu.rupp.to_dolistapp.R.*;
-
-import android.content.Intent;
-import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import dagger.hilt.android.AndroidEntryPoint;
-import kh.edu.rupp.to_dolistapp.R;
+import android.os.Bundle
+import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationBarView
+import dagger.hilt.android.AndroidEntryPoint
+import kh.edu.rupp.to_dolistapp.R
 
 @AndroidEntryPoint
-public class MainActivity extends AppCompatActivity {
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        if (savedInstanceState == null){
+        if (savedInstanceState == null) {
             getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, new HomeFragment())
-                    .commit();
+                .beginTransaction()
+                .replace(R.id.fragment_container, HomeFragment())
+                .commit()
         }
 
         // Switching between fragments in navigation bar
-        BottomNavigationView navView = findViewById(id.nav_view);
-        navView.setOnItemSelectedListener(item -> {
-
-            Fragment fragment;
-
-            if (item.getItemId() == id.navigation_home){
-                fragment = new HomeFragment();
-            } else if (item.getItemId() == id.add_task){
-                fragment = new TaskListFragment();
-            } else if (item.getItemId() == id.navigation_user_list){
-                fragment = new UserListFragment();
-            } else {
-            return false;
+        val navView = findViewById<BottomNavigationView>(R.id.nav_view)
+        navView.setOnItemSelectedListener { item ->
+            val fragment: Fragment = when (item.itemId) {
+                R.id.navigation_home ->  HomeFragment()
+                R.id.add_task -> TaskListFragment()
+                R.id.navigation_user_list -> UserListFragment()
+                else -> return@setOnItemSelectedListener false
             }
-
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .commit();
-            return true;
-        });
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit()
+            true
+        }
     }
 }

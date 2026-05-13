@@ -1,67 +1,54 @@
-package kh.edu.rupp.to_dolistapp.views;
+package kh.edu.rupp.to_dolistapp.views
 
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import kh.edu.rupp.to_dolistapp.R
+import kh.edu.rupp.to_dolistapp.adapters.TaskListAdapter
+import kh.edu.rupp.to_dolistapp.databinding.FragmentTodayTaskBinding
+import kh.edu.rupp.to_dolistapp.viewmodels.TaskViewModel
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
+class TodayTaskFragment : Fragment() {
 
-import java.util.List;
+    private var binding: FragmentTodayTaskBinding? = null
+    private var viewModel: TaskViewModel? = null
+    private var adapter: TaskListAdapter? = null
 
-import kh.edu.rupp.to_dolistapp.R;
-import kh.edu.rupp.to_dolistapp.adapters.TaskListAdapter;
-import kh.edu.rupp.to_dolistapp.databinding.FragmentTodayTaskBinding;
-import kh.edu.rupp.to_dolistapp.models.TaskList;
-import kh.edu.rupp.to_dolistapp.viewmodels.TaskViewModel;
-
-public class TodayTaskFragment extends Fragment {
-
-    private FragmentTodayTaskBinding binding;  // use fragment binding, not activity
-    private TaskViewModel viewModel;
-    private TaskListAdapter adapter;
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        // Inflate via binding instead of R.layout directly
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_today_task, container, false);
-        return binding.getRoot();
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = DataBindingUtil.inflate(
+            inflater, R.layout.fragment_today_task, container, false
+        )
+        return binding!!.root
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        // Init controller and adapter
-        viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
-        adapter = new TaskListAdapter();
+        viewModel = ViewModelProvider(this)[TaskViewModel::class.java]
+        adapter = TaskListAdapter()
 
-        binding.setViewModel(viewModel);
-        binding.setLifecycleOwner(getViewLifecycleOwner());
+        binding!!.setViewModel(viewModel)
+        binding!!.setLifecycleOwner(viewLifecycleOwner)
 
+        binding!!.todayTaskRecycler.layoutManager = LinearLayoutManager(requireContext())
+        binding!!.todayTaskRecycler.adapter = adapter
 
-        // Setup RecyclerView
-        binding.todayTaskRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.todayTaskRecycler.setAdapter(adapter);
-
-        //  Load tasks
-        viewModel.taskList.observe(getViewLifecycleOwner(), taskList -> {
-            adapter.setTasks(taskList);
-        });
+        // Fixed: taskList is LiveData<List<TaskList>> — observer receives List<TaskList>
+        viewModel!!.taskList.observe(viewLifecycleOwner) { taskList ->
+            adapter!!.setTasks(taskList ?: emptyList())
+        }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;  // avoid memory leak
-        // no presenter to dispose — ViewModel handles lifecycle
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 }

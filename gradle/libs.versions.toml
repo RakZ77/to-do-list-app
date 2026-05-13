@@ -11,13 +11,17 @@ lifecycleViewmodelKtx = "2.10.0"
 navigationFragment = "2.9.6"
 navigationUi = "2.9.6"
 recyclerview = "1.4.0"
-retrofit = "3.0.0"
-converterGson = "3.0.0"
+retrofit = "2.11.0"
+converterGson = "2.11.0"
 picasso = "2.71828"
 viewpager2 = "1.1.0"
 roomRuntime = "2.8.4"
 roomRxjava3 = "2.8.4"
 roomCompiler = "2.8.4"
+kotlin = "2.2.0"
+hilt  = "2.56"
+coreKtx = "1.13.1"
+ksp = "2.2.0-2.0.2"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -38,7 +42,11 @@ viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref =
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
 room-rxjava3 = { group = "androidx.room", name = "room-rxjava3", version.ref = "roomRxjava3" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

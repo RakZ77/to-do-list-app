@@ -1,30 +1,28 @@
-package kh.edu.rupp.to_dolistapp.database;
+package kh.edu.rupp.to_dolistapp.database
 
-import androidx.lifecycle.LiveData;
-import androidx.room.Dao;
-import androidx.room.Insert;
-import androidx.room.Query;
-
-import java.util.List;
-
-import io.reactivex.rxjava3.core.Completable;
-import io.reactivex.rxjava3.core.Flowable;
-import kh.edu.rupp.to_dolistapp.models.TaskList;
+import androidx.lifecycle.LiveData
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import io.reactivex.rxjava3.core.Completable
+import kh.edu.rupp.to_dolistapp.models.TaskList
 
 @Dao
-public interface TaskListDao {
-    @Insert
-    Completable insert(TaskList taskList);
+interface TaskListDao {
 
+    @Insert
+    fun insert(taskList: TaskList): Completable
+
+    // Returns LiveData<List<TaskList>> — no nullability, matches what Room generates
     @Query("SELECT * FROM task_list")
-    LiveData<List<TaskList>> getAllTaskLists();
+    fun getAllTaskLists(): LiveData<List<TaskList>>
 
     @Query("SELECT * FROM task_list WHERE id = :id")
-    LiveData<TaskList> getTaskListById(int id);
+    fun getTaskListById(id: Int): LiveData<TaskList>
 
     @Query("DELETE FROM task_list WHERE id = :id")
-    Completable deleteTaskListById(int id);
+    fun deleteTaskListById(id: Int): Completable
 
     @Query("DELETE FROM task_list")
-    Completable deleteAllTaskLists();
+    fun deleteAllTaskLists(): Completable
 }
